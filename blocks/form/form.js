@@ -1,20 +1,20 @@
 function createSelect(fd) {
     const select = document.createElement('select');
-    select.id = fd.Field;
-    if (fd.Placeholder) {
+    select.id = fd.id;
+    if (fd.placeholder) {
       const ph = document.createElement('option');
-      ph.textContent = fd.Placeholder;
+      ph.textContent = fd.placeholder;
       ph.setAttribute('selected', '');
       ph.setAttribute('disabled', '');
       select.append(ph);
     }
-    fd.Options.split(',').forEach((o) => {
+    fd.enum.split(',').forEach((o) => {
       const option = document.createElement('option');
       option.textContent = o.trim();
       option.value = o.trim();
       select.append(option);
     });
-    if (fd.Mandatory === 'x') {
+    if (fd.required === 'x') {
       select.setAttribute('required', 'required');
     }
     return select;
@@ -48,7 +48,7 @@ function createSelect(fd) {
   
   function createButton(fd) {
     const button = document.createElement('button');
-    button.textContent = fd.Label;
+    button.textContent = fd.label;
     button.classList.add('button');
     if (fd.Type === 'submit') {
       button.addEventListener('click', async (event) => {
@@ -67,15 +67,15 @@ function createSelect(fd) {
   
   function createHeading(fd) {
     const heading = document.createElement('h3');
-    heading.textContent = fd.Label;
+    heading.textContent = fd.label;
     return heading;
   }
   
   function createInput(fd) {
     const input = document.createElement('input');
-    input.type = fd.Type;
-    input.id = fd.Field;
-    input.setAttribute('placeholder', fd.Placeholder);
+    input.type = fd.inputType;
+    input.id = fd.id;
+    input.setAttribute('placeholder', fd.placeholder);
     if (fd.Mandatory === 'x') {
       input.setAttribute('required', 'required');
     }
@@ -84,8 +84,8 @@ function createSelect(fd) {
   
   function createTextArea(fd) {
     const input = document.createElement('textarea');
-    input.id = fd.Field;
-    input.setAttribute('placeholder', fd.Placeholder);
+    input.id = fd.id;
+    input.setAttribute('placeholder', fd.placeholder);
     if (fd.Mandatory === 'x') {
       input.setAttribute('required', 'required');
     }
@@ -94,9 +94,9 @@ function createSelect(fd) {
   
   function createLabel(fd) {
     const label = document.createElement('label');
-    label.setAttribute('for', fd.Field);
-    label.textContent = fd.Label;
-    if (fd.Mandatory === 'x') {
+    label.setAttribute('for', fd.id);
+    label.textContent = fd.label;
+    if (fd.required === 'x') {
       label.classList.add('required');
     }
     return label;
@@ -127,13 +127,13 @@ function createSelect(fd) {
     // eslint-disable-next-line prefer-destructuring
     form.dataset.action = pathname.split('.json')[0];
     json.data.forEach((fd) => {
-      fd.Type = fd.Type || 'text';
+      fd.inputType = fd.inputType || 'text';
       const fieldWrapper = document.createElement('div');
-      const style = fd.Style ? ` form-${fd.Style}` : '';
-      const fieldId = `form-${fd.Field}-wrapper${style}`;
+      const style = fd.viewType ? ` form-${fd.viewType}` : '';
+      const fieldId = `form-${fd.id}-wrapper${style}`;
       fieldWrapper.className = fieldId;
       fieldWrapper.classList.add('field-wrapper');
-      switch (fd.Type) {
+      switch (fd.inputType) {
         case 'select':
           fieldWrapper.append(createLabel(fd));
           fieldWrapper.append(createSelect(fd));
@@ -157,9 +157,9 @@ function createSelect(fd) {
           fieldWrapper.append(createInput(fd));
       }
   
-      if (fd.Rules) {
+      if (fd.rules) {
         try {
-          rules.push({ fieldId, rule: JSON.parse(fd.Rules) });
+          rules.push({ fieldId, rule: JSON.parse(fd.rules) });
         } catch (e) {
           console.log(`Invalid Rule ${fd.Rules}: ${e}`);
         }
