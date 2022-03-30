@@ -176,6 +176,12 @@ function createSelect(fd) {
   export default async function decorate(block) {
     const form = block.querySelector('a[href$=".json"]');
     if (form) {
-      form.replaceWith(await createForm(form.href));
+      if(form.innerText.startsWith('/')) {
+        form.replaceWith(await createForm(`${window.location.origin}${form.innerText}`));
+      } else if(form.innerText.startsWith('../') || form.innerText.startsWith('./')) {
+        form.replaceWith(await createForm(`${form.baseURI}${form.innerText}`));
+      } else {
+        form.replaceWith(await createForm(form.href));
+      }
     }
   }
