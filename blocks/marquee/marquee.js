@@ -15,79 +15,43 @@
  */
 
 function decorateButtons(el) {
-  const buttons = el.querySelectorAll('em a, strong a');
-  buttons.forEach((button) => {
+    const buttons = el.querySelectorAll('em a, strong a');
+    buttons.forEach((button) => {
       const parent = button.parentElement;
-      const buttonType = parent.nodeName === 'STRONG' ? 'blue' : 'outline';
+      const buttonType = parent.nodeName === 'STRONG' ? 'accent' : 'outline';
       button.classList.add('con-button', buttonType);
       parent.insertAdjacentElement('afterend', button);
       parent.remove();
-  });
-  if (buttons.length > 0) {
+    });
+    if (buttons.length > 0) {
       buttons[0].closest('p').classList.add('action-area');
+    }
   }
-}
-
-function decorateImages(el) {
-
-}
-function decorateText(el) {
-  const headings = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  const heading = headings[headings.length - 1];
-  heading.classList.add('heading-XL');
-  heading.nextElementSibling.classList.add('body-M');
-  if (heading.previousElementSibling) {
+  
+  function decorateText(el) {
+    const headings = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const heading = headings[headings.length - 1];
+    heading.classList.add('heading-XL');
+    heading.nextElementSibling.classList.add('body-M');
+    if (heading.previousElementSibling) {
       heading.previousElementSibling.classList.add('detail-M');
+    }
   }
-}
-
-export default function init(el) {
-  const wrapper = el.querySelector(':scope > div');
-  const container = el.querySelector(':scope > div > div');
-
-  // get rid of wrapper
-  const fragment = document.createDocumentFragment();
-  while (wrapper.firstChild) {
-      fragment.appendChild(wrapper.firstChild);
+  
+  export default function init(el) {
+    const children = el.querySelectorAll(':scope > div');
+    const foreground = children[children.length - 1];
+    if (children.length > 1) {
+      children[0].classList.add('background');
+    }
+    foreground.classList.add('foreground', 'container');
+    const text = foreground.querySelector('h1, h2, h3, h4, h5, h6').closest('div');
+    text.classList.add('text');
+    const image = foreground.querySelector(':scope > div:not([class])');
+    if (image) {
+      image.classList.add('image');
+    }
+    decorateButtons(text);
+    decorateText(text);
   }
-  wrapper.parentNode.replaceChild(fragment, wrapper);
-
-  container.classList.add('foreground', 'container');
-  const rows = container.querySelectorAll(':scope > p:not([class])');
-  if (rows.length > 1) {
-      const row0Img = rows[0].querySelector(':scope img');
-      const row1Img = rows[1].querySelector(':scope img');
-
-      const imgDiv = document.createElement('div');
-      imgDiv.classList.add('image');
-
-      // If rows 0 and 1 both have images?
-      if(row0Img && row1Img) {
-          const bg = document.createElement('div');
-          bg.classList.add('background');
-          bg.innerHTML += rows[0].innerHTML;
-          el.prepend(bg);
-          rows[0].remove();
-
-          imgDiv.innerHTML += rows[1].innerHTML;
-          rows[1].remove();
-
-       // If only row 0 has an image?
-      }else if (row0Img && !row1Img) {
-          imgDiv.innerHTML += rows[0].innerHTML;
-          rows[0].remove();
-      }
-
-      const textDiv = document.createElement('div');
-      textDiv.classList.add('text');
-      textDiv.innerHTML += container.innerHTML;
-
-      container.innerHTML = '';
-      container.appendChild(textDiv);
-      container.appendChild(imgDiv);
-  }
-
-  decorateButtons(container);
-  decorateText(container);
-  // decorateImages(text);
-}
+  
