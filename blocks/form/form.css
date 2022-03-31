@@ -1,7 +1,7 @@
 main .form-container .form-wrapper {
   display: flex;
   flex-direction: column;
-  margin: 1rem auto;
+  margin: 3rem auto;
   max-width: 50rem;
 }
 
