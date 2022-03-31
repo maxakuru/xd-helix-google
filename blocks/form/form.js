@@ -167,13 +167,13 @@ function createSelect(fd) {
           console.log(`Invalid Rule ${fd.rules}: ${e}`);
         }
       }
-
-      if(!hasSubmit) {
-        // temp: auto append a submit button
-        fieldWrapper.append(createButton({label: 'Submit'}));
-      }
       form.append(fieldWrapper);
     });
+
+    if(!hasSubmit) {
+      // temp: auto append a submit button
+      fieldWrapper.append(createButton({label: 'Submit'}));
+    }
   
     form.addEventListener('change', () => applyRules(form, rules));
     applyRules(form, rules);
