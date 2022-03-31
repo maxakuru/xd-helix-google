@@ -60,6 +60,8 @@ function createSelect(fd) {
           await submitForm(form);
           if(fd.redirect) {
             window.location.href = fd.redirect;
+          } else {
+            button.innerText = 'Thank you!'
           }
         }
       });
@@ -161,12 +163,15 @@ function createSelect(fd) {
         const { data: [row] } = json;
         console.log('row: ', row);
         let { average, total } = row;
+        average = parseFloat(average);
+        average = isNaN(average) ? 0 : average;
+
         total = parseInt(total);
         total = isNaN(total) ? 0 : total;
 
         const results = document.createElement('span');
         results.classList.add('form-rating-results');
-        results.innerText = `${average}/5 (${total} rating${total === 1 ? '' : 's'})`;
+        results.innerText = `${average.toFixed(2)}/5 (${total} rating${total === 1 ? '' : 's'})`;
         el.appendChild(results);
       })().catch(console.error.bind(null, 'error lazy loading ratings: '))
     });
