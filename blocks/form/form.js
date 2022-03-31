@@ -172,7 +172,9 @@ function createSelect(fd) {
 
     if(!hasSubmit) {
       // temp: auto append a submit button
-      fieldWrapper.append(createButton({label: 'Submit'}));
+      const fieldWrapper = document.createElement('div');
+      fieldWrapper.classList.add('form-submit-wrapper', 'field-wrapper');
+      fieldWrapper.append(createButton({ label: 'Submit', type: 'submit' }));
     }
   
     form.addEventListener('change', () => applyRules(form, rules));
