@@ -50,15 +50,16 @@ function createSelect(fd) {
     const button = document.createElement('button');
     button.textContent = fd.label;
     button.classList.add('button');
-    if (fd.Type === 'submit') {
+    if (fd.type === 'submit') {
       button.addEventListener('click', async (event) => {
         const form = button.closest('form');
         if (form.checkValidity()) {
           event.preventDefault();
           button.setAttribute('disabled', '');
           await submitForm(form);
-          const redirectTo = fd.Extra;
-          window.location.href = redirectTo;
+          if(fd.redirect) {
+            window.location.href = fd.redirect;
+          }
         }
       });
     }
@@ -76,7 +77,7 @@ function createSelect(fd) {
     input.type = fd.inputType;
     input.id = fd.id;
     input.setAttribute('placeholder', fd.placeholder);
-    if (fd.Mandatory === 'x') {
+    if (fd.required === 'x' || fd.required === 'true') {
       input.setAttribute('required', 'required');
     }
     return input;
@@ -86,7 +87,7 @@ function createSelect(fd) {
     const input = document.createElement('textarea');
     input.id = fd.id;
     input.setAttribute('placeholder', fd.placeholder);
-    if (fd.Mandatory === 'x') {
+    if (fd.required === 'x' || fd.required === 'true') {
       input.setAttribute('required', 'required');
     }
     return input;
@@ -96,7 +97,7 @@ function createSelect(fd) {
     const label = document.createElement('label');
     label.setAttribute('for', fd.id);
     label.textContent = fd.label;
-    if (fd.required === 'x') {
+    if (fd.required === 'x' || fd.required === 'true') {
       label.classList.add('required');
     }
     return label;
@@ -120,6 +121,7 @@ function createSelect(fd) {
   
   async function createForm(formURL) {
     const { pathname } = new URL(formURL);
+    let hasSubmit = false;
     const resp = await fetch(pathname);
     const json = await resp.json();
     const form = document.createElement('form');
@@ -150,6 +152,7 @@ function createSelect(fd) {
           fieldWrapper.append(createTextArea(fd));
           break;
         case 'submit':
+          hasSubmit = true;
           fieldWrapper.append(createButton(fd));
           break;
         default:
@@ -161,8 +164,13 @@ function createSelect(fd) {
         try {
           rules.push({ fieldId, rule: JSON.parse(fd.rules) });
         } catch (e) {
-          console.log(`Invalid Rule ${fd.Rules}: ${e}`);
+          console.log(`Invalid Rule ${fd.rules}: ${e}`);
         }
+      }
+
+      if(!hasSubmit) {
+        // temp: auto append a submit button
+        fieldWrapper.append(createButton({label: 'Submit'}));
       }
       form.append(fieldWrapper);
     });
