@@ -34,6 +34,7 @@ function createSelect(fd) {
   
   async function submitForm(form) {
     const payload = constructPayload(form);
+    console.log('POST: ', form.dataset.action);
     const resp = await fetch(form.dataset.action, {
       method: 'POST',
       cache: 'no-cache',
@@ -81,6 +82,94 @@ function createSelect(fd) {
       input.setAttribute('required', 'required');
     }
     return input;
+  }
+
+  async function queryForm(formOrEl, sheet) {
+    try {
+      const form = formOrEl.closest('form');
+      const resp = await fetch(`${form.dataset.action}.json?sheet=${sheet}`);
+      return await resp.json();
+    } catch(e) {
+      console.error('could not fetch rating results: ', e);
+    }
+  }
+
+  function createRating(fd) {
+    console.log('createRating: ', fd);
+    const fieldsetWrapper = document.createElement('span');
+    fieldsetWrapper.className = 'form-rating-set-wrapper';
+
+    const fieldset = document.createElement('fieldset');
+    fieldset.classList.add('form-rating-set');
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.id = fd.id;
+    input.setAttribute('hidden', true);
+    input.setAttribute('min', 1);
+    input.setAttribute('max', 5);
+    if (fd.required === 'x' || fd.required === 'true') {
+      input.setAttribute('required', 'required');
+    }
+    fieldset.appendChild(input);
+
+    // field set then average rating if there is one
+    fieldsetWrapper.appendChild(fieldset);
+
+    /**
+     * @type {HTMLSpanElement[]}
+     */
+    const stars = [];
+    const toggleAt = (rating) => {
+      input.value = rating + 1;
+      stars.forEach((star, i) => {
+        if(i <= rating) {
+          star.classList.add('checked');
+        } else {
+          star.classList.remove('checked');
+        }
+      });
+    }
+
+    for(let i = 0; i < 5; i++) {
+      const star = document.createElement('span');
+      star.className = 'star';
+      fieldset.appendChild(star);
+
+      star.addEventListener('click', () => {
+        toggleAt(i);
+      });
+
+      stars.push(star);
+    }
+    return fieldsetWrapper;
+  }
+
+  function lazyLoadRatings(el) {
+    console.log('form: ', el);
+    // wait until next tick so that ratings is attached to form
+    setTimeout(() => {
+      (async () => {
+        let json = await queryForm(el, 'query');
+        console.log('json: ', json);
+        if(!json){
+          return;
+          // for testing, just set some data
+          // json = {data: [{"average":"4","total":"1"}]}
+        }
+
+        const { data: [row] } = json;
+        console.log('row: ', row);
+        let { average, total } = row;
+        total = parseInt(total);
+        total = isNaN(total) ? 0 : total;
+
+        const results = document.createElement('span');
+        results.classList.add('form-rating-results');
+        results.innerText = `${average}/5 (${total} rating${total === 1 ? '' : 's'})`;
+        el.appendChild(results);
+      })().catch(console.error.bind(null, 'error lazy loading ratings: '))
+    });
   }
   
   function createTextArea(fd) {
@@ -154,6 +243,12 @@ function createSelect(fd) {
         case 'submit':
           hasSubmit = true;
           fieldWrapper.append(createButton(fd));
+          break;
+        case 'rating':
+          fieldWrapper.append(createLabel(fd));
+          const ratings = createRating(fd);
+          fieldWrapper.append(ratings);
+          lazyLoadRatings(ratings);
           break;
         default:
           fieldWrapper.append(createLabel(fd));
