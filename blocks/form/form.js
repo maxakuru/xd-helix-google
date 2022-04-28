@@ -200,6 +200,7 @@ function createSelect(fd) {
   function applyRules(form, rules) {
     const payload = constructPayload(form);
     rules.forEach((field) => {
+      try {
       const { type, condition: { key, operator, value } } = field.rule;
       if (type === 'visible') {
         if (operator === 'eq') {
@@ -210,6 +211,9 @@ function createSelect(fd) {
           }
         }
       }
+    } catch(e) {
+      console.warn('Error while applying form rule: ', e);
+    }
     });
   }
   
