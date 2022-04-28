@@ -79,8 +79,10 @@ function createSelect(fd) {
     const input = document.createElement('input');
     input.type = fd.inputType;
     input.id = fd.id;
-    input.setAttribute('placeholder', fd.placeholder);
-    if (fd.required === 'x' || fd.required === 'true') {
+    if(fd.placeholder) {
+      input.setAttribute('placeholder', fd.placeholder);
+    }
+    if (fd.required === 'x' || fd.required === 'true' || fd.required === true) {
       input.setAttribute('required', 'required');
     }
     return input;
@@ -235,8 +237,15 @@ function createSelect(fd) {
       fieldWrapper.classList.add('field-wrapper');
       switch (fd.inputType) {
         case 'select':
-          fieldWrapper.append(createLabel(fd));
-          fieldWrapper.append(createSelect(fd));
+          if(fd.viewType === 'rating') {
+            fieldWrapper.append(createLabel(fd));
+            const ratings = createRating(fd);
+            fieldWrapper.append(ratings);
+            lazyLoadRatings(ratings);
+          } else {
+            fieldWrapper.append(createLabel(fd));
+            fieldWrapper.append(createSelect(fd));
+          }
           break;
         case 'heading':
           fieldWrapper.append(createHeading(fd));
